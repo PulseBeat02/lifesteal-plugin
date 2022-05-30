@@ -1,0 +1,7 @@
+name: Lifesteal
+version: '${version}'
+main: io.github.pulsebeat02.lifestealplugin.Lifesteal
+api-version: 1.18
+authors: [ PulseBeat_02 ]
+description: Lifesteal SMP Plugin
+website: github.com/PulseBeat_02
