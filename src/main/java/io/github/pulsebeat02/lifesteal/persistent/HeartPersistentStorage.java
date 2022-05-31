@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import io.github.pulsebeat02.lifesteal.Lifesteal;
 import io.github.pulsebeat02.lifesteal.gson.GsonProvider;
 import io.github.pulsebeat02.lifesteal.hearts.HeartManager;
+import io.github.pulsebeat02.lifesteal.utils.FileUtils;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -13,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,10 +31,9 @@ public final class HeartPersistentStorage {
   }
 
   public void read() throws IOException {
-    this.createIfNotExists();
     try (final Reader reader = Files.newBufferedReader(this.file)) {
       final Runnable runnable = () -> this.parseAndModifyMap(reader);
-      ForkJoinPool.commonPool().execute(runnable);
+      this.createFileAndOperate(runnable);
     }
   }
 
@@ -47,21 +48,23 @@ public final class HeartPersistentStorage {
   }
 
   public void save() throws IOException {
-    this.createIfNotExists();
     final Map<UUID, Double> map = this.lifesteal.getManager().getHeartsMap();
     try (final Writer writer = Files.newBufferedWriter(this.file)) {
       final Runnable runnable = () -> this.gson.toJson(map, writer);
-      ForkJoinPool.commonPool().execute(runnable);
+      this.createFileAndOperate(runnable);
     }
   }
 
-  private void createIfNotExists() throws IOException {
-    if (Files.notExists(this.file)) {
-      Files.createFile(this.file);
-    }
+  private @NotNull CompletableFuture<Void> createFileAndOperate(@NotNull final Runnable runnable) {
+    final ForkJoinPool pool = ForkJoinPool.commonPool();
+    return CompletableFuture.runAsync(this::createFile, pool).thenRunAsync(runnable, pool);
   }
 
-  public @NotNull Path getHeartsFile() {
-    return this.file;
+  private void createFile() {
+    try {
+      FileUtils.createFileIfNotExists(this.file);
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
   }
 }
