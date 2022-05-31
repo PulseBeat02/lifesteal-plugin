@@ -34,15 +34,15 @@ public final class PlayerGuiPlacementListener implements Listener {
       return;
     }
 
-    final Inventory inventory = lifesteal.getGui().getInventory();
+    final Inventory inventory = this.lifesteal.getGui().getInventory();
     if (inventory != event.getInventory()) {
       return;
     }
 
-    final HeartManager manager = lifesteal.getManager();
-    int slot = event.getSlot();
+    final HeartManager manager = this.lifesteal.getManager();
+    final int slot = event.getSlot();
     switch (slot) {
-      case 11 -> manager.sacrificeHeart(clicker.getUniqueId(), getRevivedPlayerUUID(event));
+      case 11 -> manager.modifyPlayers(clicker.getUniqueId(), this.getRevivedPlayerUUID(event));
       case 15 -> clicker.closeInventory();
     }
   }
@@ -52,8 +52,8 @@ public final class PlayerGuiPlacementListener implements Listener {
     final PlayerInventory inventory = owner.getInventory();
     final ItemStack main = inventory.getItemInMainHand(); // user could've right-clicked if the item is offhand or normal hand
     final ItemStack offhand = inventory.getItemInOffHand();
-    final Optional<String> mainOptional = extractUUID(main);
-    final Optional<String> offhandOptional = extractUUID(offhand);
+    final Optional<String> mainOptional = this.extractUUID(main);
+    final Optional<String> offhandOptional = this.extractUUID(offhand);
     return UUID.fromString(mainOptional.orElseGet(offhandOptional::get));
   }
 

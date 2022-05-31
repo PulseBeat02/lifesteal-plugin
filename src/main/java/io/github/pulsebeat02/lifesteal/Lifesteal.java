@@ -5,6 +5,8 @@ import io.github.pulsebeat02.lifesteal.hearts.HeartManager;
 import io.github.pulsebeat02.lifesteal.listener.PlayerDeathListener;
 import io.github.pulsebeat02.lifesteal.listener.PlayerGuiPlacementListener;
 import io.github.pulsebeat02.lifesteal.listener.PlayerReviveListener;
+import io.github.pulsebeat02.lifesteal.persistent.HeartPersistentStorage;
+import java.io.IOException;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Server;
 import org.bukkit.plugin.PluginManager;
@@ -14,45 +16,78 @@ import org.jetbrains.annotations.NotNull;
 public final class Lifesteal extends JavaPlugin {
 
   private BukkitAudiences audiences;
+  private HeartPersistentStorage persistentStorage;
   private HeadPlacementGui gui;
   private HeartManager manager;
 
   @Override
   public void onEnable() {
-    this.audiences = BukkitAudiences.create(this);
-    this.manager = new HeartManager(this);
-    this.gui = new HeadPlacementGui();
+    this.initializeAudience();
+    this.initializeManager();
+    this.parseHeartData();
+    this.registerListeners();
+    this.initializeHeadPlacementGui();
   }
 
   @Override
   public void onDisable() {
-    // Plugin shutdown logic
+    this.saveHeartData();
+  }
+
+  private void initializeAudience() {
+    this.audiences = BukkitAudiences.create(this);
+  }
+
+  private void initializeManager() {
+    this.manager = new HeartManager(this);
+  }
+
+  private void parseHeartData() {
+    this.persistentStorage = new HeartPersistentStorage(this);
+    try {
+      this.persistentStorage.read();
+    } catch (@NotNull final IOException e) {
+      throw new AssertionError(e);
+    }
+  }
+
+  private void initializeHeadPlacementGui() {
+    this.gui = new HeadPlacementGui();
+  }
+
+  private void saveHeartData() {
+    try {
+      this.persistentStorage.save();
+    } catch (final IOException e) {
+      throw new AssertionError(e);
+    }
   }
 
   private void registerListeners() {
-
-    final Server server = getServer();
+    final Server server = this.getServer();
     final PluginManager manager = server.getPluginManager();
-
     final PlayerDeathListener playerDeathListener = new PlayerDeathListener(this);
     final PlayerGuiPlacementListener playerGuiPlacementListener =
         new PlayerGuiPlacementListener(this);
     final PlayerReviveListener playerReviveListener = new PlayerReviveListener(this);
-
     manager.registerEvents(playerDeathListener, this);
     manager.registerEvents(playerGuiPlacementListener, this);
     manager.registerEvents(playerReviveListener, this);
   }
 
   public @NotNull BukkitAudiences getAudiences() {
-    return audiences;
+    return this.audiences;
   }
 
   public @NotNull HeartManager getManager() {
-    return manager;
+    return this.manager;
   }
 
   public @NotNull HeadPlacementGui getGui() {
-    return gui;
+    return this.gui;
+  }
+
+  public @NotNull HeartPersistentStorage getPersistentStorage() {
+    return this.persistentStorage;
   }
 }

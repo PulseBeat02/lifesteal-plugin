@@ -40,16 +40,16 @@ public final class PlayerReviveListener implements Listener {
       return;
     }
 
-    if (!isValidPlaceableHead(item)) {
+    if (!this.isValidPlaceableHead(item)) {
       return;
     }
 
-    event.getPlayer().openInventory(lifesteal.getGui().getInventory());
+    event.getPlayer().openInventory(this.lifesteal.getGui().getInventory());
   }
 
   public boolean isValidPlaceableHead(@NotNull final ItemStack stack) {
     final ItemMeta meta = stack.getItemMeta();
     final PersistentDataContainer container = meta.getPersistentDataContainer();
-    return container.has(NamespacedKeyProvider.PLACEABLE_HEAD, PersistentDataType.INTEGER);
+    return container.has(NamespacedKeyProvider.OWNER_UUID, PersistentDataType.INTEGER);
   }
 }
