@@ -19,8 +19,10 @@ public final class GsonProvider {
   }
 
   private static @NotNull GsonBuilder getBuilder() {
+
     final GsonBuilder builder = new GsonBuilder();
     getAdapters().forEach(builder::registerTypeAdapter);
+
     return builder;
   }
 

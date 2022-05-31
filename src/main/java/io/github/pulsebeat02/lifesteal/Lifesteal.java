@@ -64,12 +64,15 @@ public final class Lifesteal extends JavaPlugin {
   }
 
   private void registerListeners() {
+
     final Server server = this.getServer();
     final PluginManager manager = server.getPluginManager();
+
     final PlayerDeathListener playerDeathListener = new PlayerDeathListener(this);
     final PlayerGuiPlacementListener playerGuiPlacementListener =
         new PlayerGuiPlacementListener(this);
     final PlayerReviveListener playerReviveListener = new PlayerReviveListener(this);
+
     manager.registerEvents(playerDeathListener, this);
     manager.registerEvents(playerGuiPlacementListener, this);
     manager.registerEvents(playerReviveListener, this);

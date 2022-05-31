@@ -35,6 +35,7 @@ public final class HeartPersistentStorage {
           () -> {
             final Type type = new TypeToken<Map<UUID, Double>>() {}.getType();
             final Map<UUID, Double> map = this.gson.fromJson(reader, type);
+
             final HeartManager manager = this.lifesteal.getManager();
             map.forEach(manager::addExistingPlayer);
           });

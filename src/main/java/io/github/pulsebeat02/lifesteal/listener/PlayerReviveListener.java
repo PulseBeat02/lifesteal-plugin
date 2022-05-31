@@ -48,7 +48,9 @@ public final class PlayerReviveListener implements Listener {
   }
 
   public boolean isValidPlaceableHead(@NotNull final ItemStack stack) {
+
     final ItemMeta meta = stack.getItemMeta();
+
     final PersistentDataContainer container = meta.getPersistentDataContainer();
     return container.has(NamespacedKeyProvider.OWNER_UUID, PersistentDataType.INTEGER);
   }

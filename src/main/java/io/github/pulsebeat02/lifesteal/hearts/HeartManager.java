@@ -81,7 +81,9 @@ public final class HeartManager {
   }
 
   private void sendZeroHeartMessage(@NotNull final Player player) {
+
     final BukkitAudiences audiences = this.lifesteal.getAudiences();
+
     final Audience audience = audiences.player(player);
     audience.sendMessage(Locale.PLAYER_ZERO_HEARTS.build());
   }
@@ -100,16 +102,21 @@ public final class HeartManager {
   }
 
   private void dropItem(@NotNull final Player player, @NotNull final ItemStack head) {
+
     final Location location = player.getLocation();
+
     final World world = location.getWorld();
     world.dropItem(location, head);
   }
 
   private @NotNull ItemStack addNBTData(@NotNull final ItemStack stack, @NotNull final UUID uuid) {
+
     final ItemMeta meta = stack.getItemMeta();
+
     final PersistentDataContainer container = meta.getPersistentDataContainer();
     container.set(NamespacedKeyProvider.OWNER_UUID, PersistentDataType.STRING, uuid.toString());
     stack.setItemMeta(meta);
+
     return stack;
   }
 
@@ -117,21 +124,27 @@ public final class HeartManager {
       @NotNull final UUID uuid,
       @NotNull final NullComponent<Sender> component,
       final double change) {
+
     final double changed = this.hearts.get(uuid) + change;
     this.hearts.put(uuid, changed);
+
     this.setInGameHearts(uuid);
     this.sendMessage(uuid, component);
   }
 
   private void sendMessage(
       @NotNull final UUID uuid, @NotNull final NullComponent<Sender> component) {
+
     final BukkitAudiences audience = this.lifesteal.getAudiences();
+
     final Player player = this.getPlayer(uuid);
     audience.player(player).sendMessage(component.build());
   }
 
   private void setInGameHearts(@NotNull final UUID uuid) {
+
     final double health = this.hearts.get(uuid);
+
     final Player player = this.getPlayer(uuid);
     player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health);
     player.setHealth(health);

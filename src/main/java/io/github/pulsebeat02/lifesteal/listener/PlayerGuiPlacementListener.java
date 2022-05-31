@@ -48,17 +48,23 @@ public final class PlayerGuiPlacementListener implements Listener {
   }
 
   private @NotNull UUID getRevivedPlayerUUID(@NotNull final InventoryClickEvent event) {
+
     final Player owner = (Player) event.getWhoClicked();
     final PlayerInventory inventory = owner.getInventory();
+
     final ItemStack main = inventory.getItemInMainHand(); // user could've right-clicked if the item is offhand or normal hand
     final ItemStack offhand = inventory.getItemInOffHand();
+
     final Optional<String> mainOptional = this.extractUUID(main);
     final Optional<String> offhandOptional = this.extractUUID(offhand);
+
     return UUID.fromString(mainOptional.orElseGet(offhandOptional::get));
   }
 
   private @NotNull Optional<String> extractUUID(@NotNull final ItemStack stack) {
+
     final ItemMeta meta = stack.getItemMeta();
+
     final PersistentDataContainer container = meta.getPersistentDataContainer();
     return Optional.ofNullable(container.get(NamespacedKeyProvider.OWNER_UUID, PersistentDataType.STRING));
   }

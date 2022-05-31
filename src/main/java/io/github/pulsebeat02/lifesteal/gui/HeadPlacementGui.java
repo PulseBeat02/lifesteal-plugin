@@ -1,6 +1,8 @@
 package io.github.pulsebeat02.lifesteal.gui;
 
 import io.github.pulsebeat02.lifesteal.locale.Locale;
+import io.github.pulsebeat02.lifesteal.locale.Locale.NullComponent;
+import io.github.pulsebeat02.lifesteal.locale.Sender;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,33 +17,44 @@ public final class HeadPlacementGui {
 
   public HeadPlacementGui() {
     this.inventory = Bukkit.createInventory(null, 27, Locale.SMP_REVIVE_GUI_TITLE.build());
-    initialize();
+    this.initialize();
   }
 
   private void initialize() {
-    inventory.setItem(11, getConfirmationButton());
-    inventory.setItem(15, getCancelButton());
+    this.inventory.setItem(11, this.getConfirmationButton());
+    this.inventory.setItem(15, this.getCancelButton());
   }
 
   private @NotNull ItemStack getConfirmationButton() {
-    final ItemStack confirm = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
-    final ItemMeta meta = confirm.getItemMeta();
-    meta.displayName(Locale.SMP_REVIVE_GUI_CONFIRM_NAME.build());
-    meta.lore(List.of(Locale.SMP_REVIVE_GUI_CONFIRM_LORE.build()));
-    confirm.setItemMeta(meta);
-    return confirm;
+    return this.getButton(
+        Material.GREEN_STAINED_GLASS_PANE,
+        Locale.SMP_REVIVE_GUI_CONFIRM_NAME,
+        Locale.SMP_REVIVE_GUI_CONFIRM_LORE);
   }
 
   private @NotNull ItemStack getCancelButton() {
-    final ItemStack cancel = new ItemStack(Material.RED_STAINED_GLASS_PANE);
-    final ItemMeta meta = cancel.getItemMeta();
-    meta.displayName(Locale.SMP_REVIVE_GUI_CANCEL_NAME.build());
-    meta.lore(List.of(Locale.SMP_REVIVE_GUI_CANCEL_LORE.build()));
-    cancel.setItemMeta(meta);
-    return cancel;
+    return this.getButton(
+        Material.RED_STAINED_GLASS_PANE,
+        Locale.SMP_REVIVE_GUI_CANCEL_NAME,
+        Locale.SMP_REVIVE_GUI_CANCEL_LORE);
+  }
+
+  private @NotNull ItemStack getButton(
+      @NotNull final Material material,
+      @NotNull final NullComponent<Sender> name,
+      @NotNull final NullComponent<Sender> lore) {
+
+    final ItemStack button = new ItemStack(material);
+
+    final ItemMeta meta = button.getItemMeta();
+    meta.displayName(name.build());
+    meta.lore(List.of(lore.build()));
+    button.setItemMeta(meta);
+
+    return button;
   }
 
   public @NotNull Inventory getInventory() {
-    return inventory;
+    return this.inventory;
   }
 }
