@@ -13,9 +13,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public final class PlayerReviveListener implements Listener {
-
-  private final Lifesteal lifesteal;
+public record PlayerReviveListener(Lifesteal lifesteal) implements
+    Listener {
 
   public PlayerReviveListener(@NotNull final Lifesteal lifesteal) {
     this.lifesteal = lifesteal;

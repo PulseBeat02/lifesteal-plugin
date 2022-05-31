@@ -25,7 +25,7 @@ repositories {
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
     compileOnly 'com.mojang:authlib:1.5.26'
-    implementation 'net.kyori:adventure-platform-bukkit:4.0.1'
+    implementation 'net.kyori:adventure-platform-bukkit:4.1.0'
 }
 
 def targetJavaVersion = 17

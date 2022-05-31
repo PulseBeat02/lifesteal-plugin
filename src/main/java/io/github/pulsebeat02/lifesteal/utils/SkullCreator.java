@@ -142,10 +142,9 @@ public final class SkullCreator {
     notNull(item, "item");
     notNull(base64, "base64");
 
-    if (!(item.getItemMeta() instanceof SkullMeta)) {
+    if (!(item.getItemMeta() instanceof final SkullMeta meta)) {
       return null;
     }
-    final SkullMeta meta = (SkullMeta) item.getItemMeta();
     mutateItemMeta(meta, base64);
     item.setItemMeta(meta);
 
@@ -230,7 +229,7 @@ public final class SkullCreator {
     } catch (final URISyntaxException e) {
       throw new RuntimeException(e);
     }
-    final String toEncode = "{\"textures\":{\"SKIN\":{\"url\":\"" + actualUrl.toString() + "\"}}}";
+    final String toEncode = "{\"textures\":{\"SKIN\":{\"url\":\"%s\"}}}".formatted(actualUrl);
     return Base64.getEncoder().encodeToString(toEncode.getBytes());
   }
 

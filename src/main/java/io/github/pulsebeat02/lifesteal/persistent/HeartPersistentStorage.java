@@ -36,6 +36,7 @@ public final class HeartPersistentStorage {
     }
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   private void parseAndModifyMap(@NotNull final Reader reader) {
 
     final Type type = new TypeToken<Map<UUID, Double>>() {}.getType();

@@ -12,9 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 
-public final class PlayerJoinListener implements Listener {
-
-  private final Lifesteal lifesteal;
+public record PlayerJoinListener(Lifesteal lifesteal) implements
+    Listener {
 
   public PlayerJoinListener(@NotNull final Lifesteal lifesteal) {
     this.lifesteal = lifesteal;

@@ -10,9 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.NotNull;
 
-public final class PlayerDeathListener implements Listener {
-
-  private final Lifesteal lifesteal;
+public record PlayerDeathListener(Lifesteal lifesteal) implements
+    Listener {
 
   public PlayerDeathListener(@NotNull final Lifesteal lifesteal) {
     this.lifesteal = lifesteal;

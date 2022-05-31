@@ -19,9 +19,8 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-public final class PlayerGuiPlacementListener implements Listener {
-
-  private final Lifesteal lifesteal;
+public record PlayerGuiPlacementListener(
+    Lifesteal lifesteal) implements Listener {
 
   public PlayerGuiPlacementListener(@NotNull final Lifesteal lifesteal) {
     this.lifesteal = lifesteal;
@@ -54,7 +53,8 @@ public final class PlayerGuiPlacementListener implements Listener {
     }
   }
 
-  private @NotNull UUID getRevivedPlayerUUID(@NotNull final InventoryClickEvent event) {
+  private @NotNull
+  UUID getRevivedPlayerUUID(@NotNull final InventoryClickEvent event) {
 
     final Player owner = (Player) event.getWhoClicked();
     final PlayerInventory inventory = owner.getInventory();
@@ -68,11 +68,13 @@ public final class PlayerGuiPlacementListener implements Listener {
     return UUID.fromString(mainOptional.orElseGet(offhandOptional::get));
   }
 
-  private @NotNull Optional<String> extractUUID(@NotNull final ItemStack stack) {
+  private @NotNull
+  Optional<String> extractUUID(@NotNull final ItemStack stack) {
 
     final ItemMeta meta = stack.getItemMeta();
 
     final PersistentDataContainer container = meta.getPersistentDataContainer();
-    return Optional.ofNullable(container.get(NamespacedKeyProvider.OWNER_UUID, PersistentDataType.STRING));
+    return Optional.ofNullable(
+        container.get(NamespacedKeyProvider.OWNER_UUID, PersistentDataType.STRING));
   }
 }
