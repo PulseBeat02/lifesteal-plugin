@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import org.jetbrains.annotations.NotNull;
 
 public final class HeartPersistentStorage {
@@ -31,22 +31,26 @@ public final class HeartPersistentStorage {
   public void read() throws IOException {
     this.createIfNotExists();
     try (final Reader reader = Files.newBufferedReader(this.file)) {
-      CompletableFuture.runAsync(
-          () -> {
-            final Type type = new TypeToken<Map<UUID, Double>>() {}.getType();
-            final Map<UUID, Double> map = this.gson.fromJson(reader, type);
-
-            final HeartManager manager = this.lifesteal.getManager();
-            map.forEach(manager::addExistingPlayer);
-          });
+      final Runnable runnable = () -> this.parseAndModifyMap(reader);
+      ForkJoinPool.commonPool().execute(runnable);
     }
+  }
+
+  private void parseAndModifyMap(@NotNull final Reader reader) {
+
+    final Type type = new TypeToken<Map<UUID, Double>>() {}.getType();
+    final Map<UUID, Double> map = this.gson.fromJson(reader, type);
+
+    final HeartManager manager = this.lifesteal.getManager();
+    map.forEach(manager::addExistingPlayer);
   }
 
   public void save() throws IOException {
     this.createIfNotExists();
     final Map<UUID, Double> map = this.lifesteal.getManager().getHeartsMap();
     try (final Writer writer = Files.newBufferedWriter(this.file)) {
-      CompletableFuture.runAsync(() -> this.gson.toJson(map, writer));
+      final Runnable runnable = () -> this.gson.toJson(map, writer);
+      ForkJoinPool.commonPool().execute(runnable);
     }
   }
 

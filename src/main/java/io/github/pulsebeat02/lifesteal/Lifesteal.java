@@ -7,8 +7,10 @@ import io.github.pulsebeat02.lifesteal.listener.PlayerGuiPlacementListener;
 import io.github.pulsebeat02.lifesteal.listener.PlayerReviveListener;
 import io.github.pulsebeat02.lifesteal.persistent.HeartPersistentStorage;
 import java.io.IOException;
+import java.util.Set;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Server;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -68,14 +70,12 @@ public final class Lifesteal extends JavaPlugin {
     final Server server = this.getServer();
     final PluginManager manager = server.getPluginManager();
 
-    final PlayerDeathListener playerDeathListener = new PlayerDeathListener(this);
-    final PlayerGuiPlacementListener playerGuiPlacementListener =
-        new PlayerGuiPlacementListener(this);
-    final PlayerReviveListener playerReviveListener = new PlayerReviveListener(this);
-
-    manager.registerEvents(playerDeathListener, this);
-    manager.registerEvents(playerGuiPlacementListener, this);
-    manager.registerEvents(playerReviveListener, this);
+    final Set<Listener> listeners =
+        Set.of(
+            new PlayerDeathListener(this),
+            new PlayerGuiPlacementListener(this),
+            new PlayerReviveListener(this));
+    listeners.forEach((listener) -> manager.registerEvents(listener, this));
   }
 
   public @NotNull BukkitAudiences getAudiences() {

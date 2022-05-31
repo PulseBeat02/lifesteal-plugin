@@ -3,6 +3,7 @@ package io.github.pulsebeat02.lifesteal.listener;
 import io.github.pulsebeat02.lifesteal.Lifesteal;
 import io.github.pulsebeat02.lifesteal.hearts.HeartManager;
 import io.github.pulsebeat02.lifesteal.key.NamespacedKeyProvider;
+import io.github.pulsebeat02.lifesteal.utils.PlayerUtils;
 import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.entity.HumanEntity;
@@ -31,6 +32,12 @@ public final class PlayerGuiPlacementListener implements Listener {
 
     final HumanEntity clicker = event.getWhoClicked();
     if (!(clicker instanceof Player)) {
+      return;
+    }
+
+    final Player player = (Player) clicker;
+    final UUID uuid = player.getUniqueId();
+    if (!PlayerUtils.isCorrectWorld(uuid)) {
       return;
     }
 

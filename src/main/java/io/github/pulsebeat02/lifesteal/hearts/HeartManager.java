@@ -1,38 +1,34 @@
 package io.github.pulsebeat02.lifesteal.hearts;
 
 import io.github.pulsebeat02.lifesteal.Lifesteal;
-import io.github.pulsebeat02.lifesteal.key.NamespacedKeyProvider;
 import io.github.pulsebeat02.lifesteal.locale.Locale;
 import io.github.pulsebeat02.lifesteal.locale.Locale.NullComponent;
 import io.github.pulsebeat02.lifesteal.locale.Sender;
+import io.github.pulsebeat02.lifesteal.utils.ItemStackUtils;
+import io.github.pulsebeat02.lifesteal.utils.PlayerUtils;
 import io.github.pulsebeat02.lifesteal.utils.SkullCreator;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 public final class HeartManager {
 
   private final Lifesteal lifesteal;
   private final Map<UUID, Double> hearts;
+  private final BukkitAudiences audiences;
 
   public HeartManager(@NotNull final Lifesteal lifesteal) {
     this.lifesteal = lifesteal;
     this.hearts = new HashMap<>();
+    this.audiences = lifesteal.getAudiences();
   }
 
   public void addExistingPlayer(@NotNull final UUID uuid, final double health) {
@@ -73,18 +69,15 @@ public final class HeartManager {
   private void checkZero(@NotNull final UUID uuid) {
     final double value = this.hearts.get(uuid);
     if (value <= 0) {
-      final Player player = this.getPlayer(uuid);
+      final Player player = PlayerUtils.getPlayerExceptionally(uuid);
       this.sendZeroHeartMessage(player);
       this.setSpectator(player);
-      this.dropHead(player);
+      this.dropHead(uuid);
     }
   }
 
   private void sendZeroHeartMessage(@NotNull final Player player) {
-
-    final BukkitAudiences audiences = this.lifesteal.getAudiences();
-
-    final Audience audience = audiences.player(player);
+    final Audience audience = this.audiences.player(player);
     audience.sendMessage(Locale.PLAYER_ZERO_HEARTS.build());
   }
 
@@ -92,32 +85,21 @@ public final class HeartManager {
     player.setGameMode(GameMode.SPECTATOR);
   }
 
-  private void dropHead(@NotNull final Player player) {
-    CompletableFuture.runAsync(
-        () -> {
-          final ItemStack head = SkullCreator.itemFromUuid(player.getUniqueId());
-          final ItemStack modified = this.addNBTData(head, player.getUniqueId());
-          this.dropItem(player, modified);
-        });
+  private void dropHead(@NotNull final UUID uuid) {
+    final Runnable runnable = () -> this.createItemStack(uuid);
+    ForkJoinPool.commonPool().execute(runnable);
   }
 
-  private void dropItem(@NotNull final Player player, @NotNull final ItemStack head) {
-
-    final Location location = player.getLocation();
-
-    final World world = location.getWorld();
-    world.dropItem(location, head);
+  private void createItemStack(@NotNull final UUID uuid) {
+    final ItemStack head = SkullCreator.itemFromUuid(uuid);
+    final ItemStack modified = ItemStackUtils.addNBTData(head, uuid);
+    this.dropItem(uuid, modified);
   }
 
-  private @NotNull ItemStack addNBTData(@NotNull final ItemStack stack, @NotNull final UUID uuid) {
-
-    final ItemMeta meta = stack.getItemMeta();
-
-    final PersistentDataContainer container = meta.getPersistentDataContainer();
-    container.set(NamespacedKeyProvider.OWNER_UUID, PersistentDataType.STRING, uuid.toString());
-    stack.setItemMeta(meta);
-
-    return stack;
+  private void dropItem(@NotNull final UUID uuid, @NotNull final ItemStack head) {
+    if (!ItemStackUtils.dropItemAtPlayer(uuid, head)) {
+      throw new AssertionError("Head for UUID %s despawned!".formatted(uuid));
+    }
   }
 
   private void modifyHeart(
@@ -125,7 +107,11 @@ public final class HeartManager {
       @NotNull final NullComponent<Sender> component,
       final double change) {
 
-    final double changed = this.hearts.get(uuid) + change;
+    double changed = this.hearts.get(uuid) + change;
+    if (changed < 0) {
+      changed = 0;
+    }
+
     this.hearts.put(uuid, changed);
 
     this.setInGameHearts(uuid);
@@ -134,28 +120,13 @@ public final class HeartManager {
 
   private void sendMessage(
       @NotNull final UUID uuid, @NotNull final NullComponent<Sender> component) {
-
-    final BukkitAudiences audience = this.lifesteal.getAudiences();
-
-    final Player player = this.getPlayer(uuid);
-    audience.player(player).sendMessage(component.build());
+    final Player player = PlayerUtils.getPlayerExceptionally(uuid);
+    this.audiences.player(player).sendMessage(component.build());
   }
 
   private void setInGameHearts(@NotNull final UUID uuid) {
-
     final double health = this.hearts.get(uuid);
-
-    final Player player = this.getPlayer(uuid);
-    player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health);
-    player.setHealth(health);
-  }
-
-  private @NotNull Player getPlayer(@NotNull final UUID uuid) {
-    final Player player = Bukkit.getPlayer(uuid);
-    if (player == null) {
-      throw new AssertionError("The player %s is not online!".formatted(uuid));
-    }
-    return player;
+    PlayerUtils.setHealth(uuid, health);
   }
 
   public @NotNull Map<UUID, Double> getHeartsMap() {

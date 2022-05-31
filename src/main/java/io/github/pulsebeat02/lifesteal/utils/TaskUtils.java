@@ -2,6 +2,7 @@ package io.github.pulsebeat02.lifesteal.utils;
 
 import io.github.pulsebeat02.lifesteal.Lifesteal;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import org.jetbrains.annotations.NotNull;
 
